@@ -1,0 +1,18 @@
+version: "2.0"
+services:
+  mysql-service:
+    image: mysql:5.7
+    container_name: mysql-service
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=Welcome123
+      - MYSQL_DATABASE=hotel
+  web-service:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - "8076:8080"
+    depends_on:
+      - mysql-service
+

@@ -1,0 +1,50 @@
+#ce' to expose backend application deployment
+apiVersion: v1
+kind: Service
+metadata:
+  name: fmr-backend
+spec:
+  selector:  # backend application pod lables should match these
+    app: fmr-app
+    tier: backend
+  ports:
+  - protocol: "TCP"
+    port: 8080
+    targetPort: 8080
+    nodePort: 32304
+  type: NodePort   # use NodePort, if you are not running Kubernetes on cloud
+---
+# Configure 'Deployment' of backend application
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fmr-backend
+  labels:
+    app: fmr
+    tier: backend
+spec:
+  replicas: 1   # Number of replicas of back-end application to be deployed
+  selector:
+    matchLabels: # backend application pod labels should match these
+      app: fmr
+      tier: backend
+  template:
+    metadata:
+      labels: # Must macth 'Service' and 'Deployment' labels
+        app: fmr
+        tier: backend
+    spec:
+      containers:
+      - name: fmr-backend
+        image: mahesh2210/findmyroombackend:kube   # docker image of backend application
+        env:   # Setting Enviornmental Variables
+          - name: DB_HOST   # Setting Database host address from configMap
+            value: "mysql"
+          - name: DB_NAME  # Setting Database name from configMap
+            value: "mydb"
+          - name: DB_USERNAME  # Setting Database username from Secret
+            value: "user"
+          - name: DB_PASSWORD # Setting Database password from Secret
+            value: "Welcome123"
+        ports:
+        - containerPort: 8080
